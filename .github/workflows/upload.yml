@@ -1,0 +1,32 @@
+name: Auto YouTube Uploader
+
+on:
+  schedule:
+    - cron: '30 8 * * *' # Indian Time (IST) ke hisab se roz dopahar 2:00 baje automatic chalega
+  workflow_dispatch: # Isse tum manually bhi jab chaho ek click me run kar sakte ho
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Auto Uploader
+      env:
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+        YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+        YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        GD_REFRESH_TOKEN: ${{ secrets.GD_REFRESH_TOKEN }}
+      run: python uploader.py
