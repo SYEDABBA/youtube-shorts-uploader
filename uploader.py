@@ -4,17 +4,20 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
-# Environment variables fetch kar rahe hain
-CLIENT_ID = os.environ.get("YT_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("YT_CLIENT_SECRET")
-REFRESH_TOKEN = os.environ.get("YT_REFRESH_TOKEN")
+# Environment variables fetch kar rahe hain (multiple variations support ke sath)
+CLIENT_ID = os.environ.get("YT_CLIENT_ID") or os.environ.get("CLIENT_ID")
+CLIENT_SECRET = os.environ.get("YT_CLIENT_SECRET") or os.environ.get("CLIENT_SECRET")
+REFRESH_TOKEN = os.environ.get("YT_REFRESH_TOKEN") or os.environ.get("GD_REFRESH_TOKEN")
 DRIVE_FOLDER_ID = os.environ.get("DRIVE_FOLDER_ID")
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
-print(f"Starting uploader script for Drive Folder ID: {DRIVE_FOLDER_ID}")
+print("--- Checking Environment Variables ---")
+print(f"CLIENT_ID Present: {bool(CLIENT_ID)}")
+print(f"CLIENT_SECRET Present: {bool(CLIENT_SECRET)}")
+print(f"REFRESH_TOKEN Present: {bool(REFRESH_TOKEN)}")
+print(f"DRIVE_FOLDER_ID Present: {bool(DRIVE_FOLDER_ID)} ({DRIVE_FOLDER_ID})")
 
 if not all([CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN, DRIVE_FOLDER_ID]):
-    print("Error: Missing required environment variables/secrets!")
+    print("❌ Error: Missing one or more required environment variables/secrets in GitHub Settings!")
     sys.exit(1)
 
 # Tumhara YouTube Video Title aur Description
@@ -98,14 +101,13 @@ try:
 
     print(f"Video uploaded successfully! Video ID: {response.get('id')}")
 
-    # Processed video ko Google Drive se delete karna taaki dubara upload na ho
+    # Processed video ko Google Drive se delete karna
     drive_service.files().delete(fileId=file_id).execute()
     print("Processed video deleted from Google Drive folder.")
 
-    # Local temporary file clean up
     if os.path.exists(local_video_path):
         os.remove(local_video_path)
 
-except Exception as e:
-    print(f"An error occurred during execution: {e}")
+except Exception as g_err:
+    print(f"An error occurred during execution: {g_err}")
     sys.exit(1)
