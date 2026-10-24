@@ -2,6 +2,7 @@ import os
 import sys
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
 # Environment variables fetch kar rahe hain
 CLIENT_ID = os.environ.get("YT_CLIENT_ID")
@@ -16,7 +17,7 @@ if not all([CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN, DRIVE_FOLDER_ID]):
     print("Error: Missing required environment variables/secrets!")
     sys.exit(1)
 
-# YouTube Video Title aur Description jo aapne diya hai
+# Tumhara YouTube Video Title aur Description
 VIDEO_TITLE = "Allah Hu Akbar ❤️🕋 #shorts"
 
 VIDEO_DESCRIPTION = """🤫 Allah Hu Akbar ❤️🕋
@@ -55,10 +56,55 @@ try:
         sys.exit(0)
 
     video_file = files[0]
-    print(f"Found video to upload: {video_file['name']}")
+    file_id = video_file['id']
+    file_name = video_file['name']
+    print(f"Found video to upload: {file_name} (ID: {file_id})")
 
-    # Yahan par aapka YouTube upload execution logic aayega (jo already aapki purani script me tha)
-    print("Ready for upload with your custom title and description!")
+    # Download video locally from Google Drive
+    local_video_path = "temp_video.mp4"
+    request = drive_service.files().get_media(fileId=file_id)
+    with open(local_video_path, "wb") as f:
+        f.write(request.execute())
+    print("Video downloaded locally successfully!")
+
+    # Upload video to YouTube
+    body = {
+        'snippet': {
+            'title': VIDEO_TITLE,
+            'description': VIDEO_DESCRIPTION,
+            'tags': ['AllahHuAkbar', 'IslamicStatus', 'IslamicShorts', 'Shorts'],
+            'categoryId': '22'
+        },
+        'status': {
+            'privacyStatus': 'public',
+            'selfDeclaredMadeForKids': False
+        }
+    }
+
+    media = MediaFileUpload(local_video_path, chunksize=-1, resumable=True)
+    print("Uploading video to YouTube...")
+
+    request = youtube_service.videos().insert(
+        part=','.join(body.keys()),
+        body=body,
+        media_body=media
+    )
+
+    response = None
+    while response is None:
+        status, response = request.next_chunk()
+        if status:
+            print(f"Upload progress: {int(status.progress() * 100)}%")
+
+    print(f"Video uploaded successfully! Video ID: {response.get('id')}")
+
+    # Processed video ko Google Drive se delete karna taaki dubara upload na ho
+    drive_service.files().delete(fileId=file_id).execute()
+    print("Processed video deleted from Google Drive folder.")
+
+    # Local temporary file clean up
+    if os.path.exists(local_video_path):
+        os.remove(local_video_path)
 
 except Exception as e:
     print(f"An error occurred during execution: {e}")
