@@ -12,31 +12,31 @@ YT_CLIENT_ID = os.environ.get("YT_CLIENT_ID")
 YT_CLIENT_SECRET = os.environ.get("YT_CLIENT_SECRET")
 GD_REFRESH_TOKEN = os.environ.get("GD_REFRESH_TOKEN")
 
-FOLDER_IDS = ["16F9CmM4abxAvX_nUPyAKXSSl94T0xUMV", "1dVjqB7m_IKHIZ2-PN8PmNiXhC4jRVFbU"]
+# Tumhare naye Islamic Reels wale folder ki ID
+FOLDER_IDS = ["1_Oz_5rqk5BLZkWf7jvCSN_l72ofxtah7"]
 
 if not all([YT_REFRESH_TOKEN, YT_CLIENT_ID, YT_CLIENT_SECRET, GD_REFRESH_TOKEN]):
     print("❌ Error: Missing required environment secrets!")
     sys.exit(1)
 
-# Fixed Title
-FIXED_TITLE = "दो लड़कों को मिली बदतमीजी करने की सजा! movie explained in hindi #short #movie #shorts"
+# Tumhara diya hua exact Title
+FIXED_TITLE = "Allah Hu Akbar 🤲❤️ | Islamic Status 🕋✨ #allah #islamicvideo #trending #shorts #motivation"
 
-# Fixed Description Base
-FIXED_DESCRIPTION = """दो लड़कों को मिली बदतमीजी करने की सजा! movie explained in hindi #short #movie #shorts
+# Tumhara diya hua exact Description
+FIXED_DESCRIPTION = """📝 
+🤫 Allah Hu Akbar ❤️🕋
+Allah is the Greatest 🤲✨
+Keep Allah in your heart and faith in your soul. ❤️☝️
+Like 👍 Share 🔄 Subscribe ❤️
 
-📌 Disclaimer:
-this videos here are made for the purposes of **Education, Review, Analysis, Research and Entertainment only. The video clips, images, audio or other content used in it is not intended to be a reproduction of the original work but rather a review and interpretation of it.
-
-#moviereview #movie #movies #film #filmreview #cinema #moviereviews #review #films #cinephile #movienight #netflix #horror #movielover #movierecommendation #moviebuff #movietime #horrormovies #moviescenes #podcast #filmreviews #filmcritic #moviecritic #drama #movieaddict #thriller #comedy #moviereviewer #reviews #hollywood #cinematography #horrormovie #s #movielovers #moviepodcast #filmcommunity #moviecollection #moviequotes #cinephilecommunity #action #moviegeek #bluray #filmmaking #actor #bollywood #horrorfan #reviewfilm #bluraycollection #letterboxd #scifi #filmbuff #filmstagram #moviefan #horrorfilm #instamovies #cinematic #movieposter #disney #smovies #moviecollector 
+#AllahHuAkbar #IslamicStatus #IslamicReels #IslamicShorts #MuslimUmmah #Allah #Deen #IslamicVibes #Muslim #ViralShorts #TrendingShorts #DripStatus #Shorts #YouTubeShorts
 """
 
-# Fixed Tags Base
+# Islamic Tags
 FIXED_TAGS = [
-    "Movie explanation in hindi", "movie review in Hindi", "Hollywood movie explain in hindi",
-    "South movie explain in hindi", "horror movie explain", "sci fi movie", "new movie",
-    "best scene explain", "movies explained in hindi", "thriller movie", "explain",
-    "Netflix", "Ott", "bigboss", "movie TV", "Bollywood movie explain",
-    "movie hindi doubbed", "movie"
+    "AllahHuAkbar", "IslamicStatus", "IslamicReels", "IslamicShorts", 
+    "MuslimUmmah", "Allah", "Deen", "IslamicVibes", "Muslim", 
+    "ViralShorts", "TrendingShorts", "Shorts", "YouTubeShorts"
 ]
 
 def get_video_from_drive():
@@ -70,7 +70,6 @@ def apply_silent_trending_audio(input_video_path, output_video_path):
     trending_song_title = ""
     trending_audio_file = "temp_trending_audio.mp3"
     
-    # 1. YouTube Music Trending Top Track Info Extract
     ydl_opts_info = {
         'extract_flat': True,
         'playlistend': 1,
@@ -88,7 +87,6 @@ def apply_silent_trending_audio(input_video_path, output_video_path):
                 trending_song_title = top_song.get('title', 'Trending Track')
                 print(f"🔥 Found Trending Track: {trending_song_title}")
                 
-                # 2. Download Trending Audio
                 ydl_opts_dl = {
                     'format': 'bestaudio/best',
                     'outtmpl': trending_audio_file,
@@ -97,7 +95,6 @@ def apply_silent_trending_audio(input_video_path, output_video_path):
                 with yt_dlp.YoutubeDL(ydl_opts_dl) as ydl_dl:
                     ydl_dl.download([first_video_url])
 
-                # 3. Layering Audio with MoviePy (Volume set to ZERO 0.0)
                 if os.path.exists(trending_audio_file):
                     video = VideoFileClip(input_video_path)
                     trending_audio = AudioFileClip(trending_audio_file).with_volume_scaling(0.0)
@@ -111,7 +108,6 @@ def apply_silent_trending_audio(input_video_path, output_video_path):
                     final_video = video.with_audio(final_audio)
                     final_video.write_videofile(output_video_path, codec="libx264", audio_codec="aac", logger=None)
                     
-                    # Cleanup trending audio file
                     os.remove(trending_audio_file)
                     video.close()
                     final_video.close()
@@ -121,11 +117,10 @@ def apply_silent_trending_audio(input_video_path, output_video_path):
     except Exception as e:
         print(f"⚠️ Trending audio process skipped due to error: {e}")
     
-    # Fallback if trending fails: use original video
     return input_video_path, trending_song_title
 
 def upload_to_youtube(video_path, trending_song_name=""):
-    print("📤 Uploading video to YouTube Channel with upgraded SEO...")
+    print("📤 Uploading video to YouTube Channel with Islamic SEO...")
     creds = Credentials(
         token=None,
         refresh_token=YT_REFRESH_TOKEN.strip(),
@@ -135,12 +130,11 @@ def upload_to_youtube(video_path, trending_song_name=""):
     )
     youtube = build('youtube', 'v3', credentials=creds)
     
-    # Update description & tags with trending metadata if present
     final_description = FIXED_DESCRIPTION
     final_tags = list(FIXED_TAGS)
     
     if trending_song_name:
-        final_description += f"\n\n--- Audio Remix Source: {trending_song_name} ---"
+        final_description += f"\n--- Remix Audio Track: {trending_song_name} ---"
         final_tags.append(trending_song_name[:20])
 
     body = {
@@ -162,22 +156,18 @@ def upload_to_youtube(video_path, trending_song_name=""):
     print(f"🎉 SUCCESS! Video uploaded successfully. Video ID: {response.get('id')}")
 
 def main():
-    print("🚀 Starting automated upload system with Silent Audio Hijack...")
+    print("🚀 Starting automated upload system for Islamic Reels...")
     raw_video_path, video_name = get_video_from_drive()
     if not raw_video_path: return
     
     final_video_path = "temp_final_video.mp4"
     
     try: 
-        # Apply Silent Audio
         processed_video, trending_name = apply_silent_trending_audio(raw_video_path, final_video_path)
-        
-        # Upload
         upload_to_youtube(processed_video, trending_song_name=trending_name)
     except Exception as e:
         print(f"❌ YouTube upload failed with error: {e}")
     finally:
-        # Cleanup temporary files
         for temp_file in [raw_video_path, final_video_path]:
             if os.path.exists(temp_file): 
                 try:
