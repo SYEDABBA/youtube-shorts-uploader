@@ -2,7 +2,7 @@ name: Auto YouTube Uploader
 
 on:
   schedule:
-    - cron: '30 8 * * *'
+    - cron: '30 8 * * *' # Indian Time (IST) ke hisab se roz dopahar 2:00 baje
   workflow_dispatch:
 
 jobs:
