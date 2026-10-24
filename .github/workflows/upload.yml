@@ -2,8 +2,8 @@ name: Auto YouTube Uploader (Client 1 & 2)
 
 on:
   schedule:
-    - cron: '30 8 * * *' # Indian Time (IST) ke hisab se roz dopahar 2:00 baje chalega
-  workflow_dispatch: # Manual run ke liye
+    - cron: '30 8 * * *' # Indian Time (IST) ke hisab se roz dopahar 2:00 baje
+  workflow_dispatch: # Manual trigger ke liye
 
 jobs:
   upload-client-1:
